@@ -11,7 +11,8 @@ export const usePanelVentasLogic = () => {
     correo: "",
     direccion: "",
     productoSeleccionado: "",
-    cantidad: 1
+    cantidad: 1,
+    tipoComprobante: "BOLETA"
   });
   // Estado para almacenar los productos obtenidos del backend
   const [productos, setProductos] = useState([]);
@@ -120,12 +121,91 @@ export const usePanelVentasLogic = () => {
     }));
   };
 
+  // Función para calcular el total de la venta sumando los subtotales de cada producto
   const calcularTotal = () => {
     return detalleVenta.reduce(
       (total, producto) =>
         total + producto.subtotal,
       0
     );
+  };
+
+  const registrarVenta = async () => {
+
+    if (detalleVenta.length === 0) {
+      alert("Debe agregar productos");
+      return;
+    }
+
+    const nombresSeparados =
+      form.nombreCompleto.split(" ");
+
+    const body = {
+      venta: {
+        tipoDocumento: "DNI",
+        nroDocumento: form.dni,
+        empleadoId: 1,
+
+        productos: detalleVenta.map(
+          (producto) => ({
+            productoId: producto.id,
+            cantidad: producto.cantidad
+          })
+        ),
+
+        tipoComprobante: "BOLETA"
+      },
+
+      cliente: {
+        tipoDocumento: "DNI",
+        nroDocumento: form.dni,
+
+        nombres:
+          nombresSeparados[0] || "",
+
+        apellidoP:
+          nombresSeparados[1] || "",
+
+        apellidoM:
+          nombresSeparados[2] || "",
+
+        direccion: form.direccion,
+        telefono: form.telefono
+      }
+    };
+
+    try {
+      const response = await fetch(
+        "http://localhost:8080/api/ventas/procesar",
+        {
+          method: "POST",
+          headers: {
+            "Content-Type":
+              "application/json"
+          },
+          body: JSON.stringify(body)
+        }
+      );
+
+      if (!response.ok) {
+        throw new Error(
+          "Error al registrar venta"
+        );
+      }
+
+      const data =
+        await response.json();
+
+      console.log(data);
+
+      alert("Venta registrada");
+    } catch (error) {
+      console.error(error);
+
+      alert(
+        "Error al registrar venta"
+      );
+    }
   };
 
   return {
@@ -135,6 +215,7 @@ export const usePanelVentasLogic = () => {
     calcularTotal,
     handleChange,
     buscarDNI,
-    agregarProducto
+    agregarProducto,
+    registrarVenta
   };
 };

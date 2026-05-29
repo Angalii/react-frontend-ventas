@@ -9,7 +9,8 @@ function PanelVentas() {
     handleChange,
     buscarDNI,
     agregarProducto,
-    calcularTotal
+    calcularTotal,
+    registrarVenta
   } = usePanelVentasLogic();
 
   return (
@@ -308,7 +309,7 @@ function PanelVentas() {
             </div>
           </div>
 
-          <button className="w-full bg-pink-500 hover:bg-pink-600 text-white py-4 rounded-xl font-semibold transition">
+          <button onClick={registrarVenta} className="w-full bg-pink-500 hover:bg-pink-600 text-white py-4 rounded-xl font-semibold transition">
             Registrar Venta
           </button>
         </div>
