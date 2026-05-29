@@ -14,6 +14,10 @@ export const usePanelVentasLogic = () => {
     cantidad: 1,
     tipoComprobante: "BOLETA"
   });
+  // estado para el modal de confirmación
+  const [mostrarModal, setMostrarModal] = useState(false);
+
+  const [ventaRegistrada, setVentaRegistrada] = useState(null);
   // Estado para almacenar los productos obtenidos del backend
   const [productos, setProductos] = useState([]);
 
@@ -130,10 +134,25 @@ export const usePanelVentasLogic = () => {
     );
   };
 
+  // Función para registrar la venta enviando los datos al backend
   const registrarVenta = async () => {
+    // DNI obligatorio
+    if (!form.dni.trim()) {
+      alert("Debe ingresar un DNI");
+      return;
+    }
 
+    // Validar DNI completo
+    if (form.dni.length !== 8) {
+      alert("El DNI debe tener 8 dígitos");
+      return;
+    }
+
+    // Mínimo un producto
     if (detalleVenta.length === 0) {
-      alert("Debe agregar productos");
+      alert(
+        "Debe agregar al menos un producto"
+      );
       return;
     }
 
@@ -193,12 +212,14 @@ export const usePanelVentasLogic = () => {
         );
       }
 
-      const data =
-        await response.json();
+      const data = await response.json();
 
-      console.log(data);
+      setVentaRegistrada(data);
+      setMostrarModal(true);
 
-      alert("Venta registrada");
+      // console.log(data);
+
+      // alert("Venta registrada");
     } catch (error) {
       console.error(error);
 
@@ -208,14 +229,34 @@ export const usePanelVentasLogic = () => {
     }
   };
 
+  // Función para limpiar el formulario después de registrar la venta
+  const limpiarFormulario = () => {
+    setForm({
+      tipoDoc: "DNI",
+      dni: "",
+      nombreCompleto: "",
+      direccion: "",
+      telefono: "",
+      correo: "",
+      productoSeleccionado: "",
+      cantidad: ""
+    });
+
+    setDetalleVenta([]);
+  };
+
   return {
     form,
     productos,
     detalleVenta,
+    mostrarModal,
+    ventaRegistrada,
+    setMostrarModal,
     calcularTotal,
     handleChange,
     buscarDNI,
     agregarProducto,
-    registrarVenta
+    registrarVenta,
+    limpiarFormulario
   };
 };
